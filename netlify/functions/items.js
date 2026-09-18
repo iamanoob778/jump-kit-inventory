@@ -33,6 +33,25 @@ function inferCategory(name) {
   return 'uncategorized';
 }
 
+// Categories that are re-used equipment rather than stuff that gets used up.
+// Everything else defaults to consumable.
+const DURABLE_CATEGORIES = ['Splinting & Fractures', 'Tools & Equipment'];
+
+function inferItemType(category) {
+  return DURABLE_CATEGORIES.includes(category) ? 'durable' : 'consumable';
+}
+
+// Items that are almost always stored/counted by pack or box rather than
+// individually — gloves, masks, gauze, swabs. If someone logs one of these
+// without an explicit count (just "Nitrile Gloves", not "Nitrile Gloves x50"),
+// we mark it as an estimate and don't threshold-alarm on it, since "1 pack"
+// isn't a real quantity and shouldn't trip a false LOW badge.
+const BULK_ESTIMATE_PATTERN = /glove|nitrile|latex glove|\bmask\b|n95|gauze|swab/i;
+
+function isBulkEstimateCandidate(name) {
+  return BULK_ESTIMATE_PATTERN.test(name || '');
+}
+
 exports.handler = async (event) => {
   const method = event.httpMethod;
   const body = event.body ? JSON.parse(event.body) : {};
@@ -48,6 +67,7 @@ exports.handler = async (event) => {
       if (qs.search) query = query.ilike('name', `%${qs.search}%`);
       if (qs.category) query = query.eq('category', qs.category);
       if (qs.status) query = query.eq('status', qs.status);
+      if (qs.item_type) query = query.eq('item_type', qs.item_type);
 
       // Default order groups items by category, then alphabetically within
       // each category, so the list is organized without anyone having to
@@ -76,16 +96,24 @@ exports.handler = async (event) => {
       const category = body.category && body.category.trim()
         ? body.category.trim()
         : inferCategory(body.name);
+      const item_type = body.item_type || inferItemType(category);
+      // Only auto-flag as an estimate when the caller didn't specify a
+      // quantity — if someone typed an actual number, trust it.
+      const estimate_only = body.estimate_only ?? (body.quantity == null && isBulkEstimateCandidate(body.name));
+      const quantity = body.quantity ?? 0;
+      const low_stock_threshold = body.low_stock_threshold ?? (estimate_only ? 0 : 1);
       const { data, error } = await supabase
         .from('items')
         .insert({
           kit_id: body.kit_id,
           name: body.name,
           category,
-          quantity: body.quantity ?? 0,
-          low_stock_threshold: body.low_stock_threshold ?? 1,
+          item_type,
+          estimate_only,
+          quantity,
+          low_stock_threshold,
           expires_at: body.expires_at || null,
-          status: computeStatus(body.quantity ?? 0, body.low_stock_threshold ?? 1, body.expires_at),
+          status: computeStatus(quantity, low_stock_threshold, body.expires_at),
         })
         .select();
       if (error) throw error;
@@ -98,14 +126,24 @@ exports.handler = async (event) => {
       const rows = body.lines
         .map((line) => parseLine(line))
         .filter((r) => r.name)
-        .map((r) => ({
-          kit_id: body.kit_id,
-          name: r.name,
-          quantity: r.quantity,
-          category: inferCategory(r.name),
-          low_stock_threshold: 1,
-          status: computeStatus(r.quantity, 1, null),
-        }));
+        .map((r) => {
+          const category = inferCategory(r.name);
+          // r.explicitQty is false when the line had no count ("Nitrile
+          // Gloves") and parseLine defaulted it to 1. For bulk-packaged
+          // consumables that's not a real count, so don't threshold-alarm.
+          const estimate_only = !r.explicitQty && isBulkEstimateCandidate(r.name);
+          const low_stock_threshold = estimate_only ? 0 : 1;
+          return {
+            kit_id: body.kit_id,
+            name: r.name,
+            quantity: r.quantity,
+            category,
+            item_type: inferItemType(category),
+            estimate_only,
+            low_stock_threshold,
+            status: computeStatus(r.quantity, low_stock_threshold, null),
+          };
+        });
       if (rows.length === 0) return respond(400, { error: 'No valid items parsed' });
       const { data, error } = await supabase.from('items').insert(rows).select();
       if (error) throw error;
@@ -114,7 +152,7 @@ exports.handler = async (event) => {
 
     if (method === 'POST' && body.action === 'update') {
       const update = {};
-      ['name', 'category', 'quantity', 'low_stock_threshold', 'expires_at', 'photo_url', 'pack_size', 'lot_number', 'condition'].forEach((f) => {
+      ['name', 'category', 'quantity', 'low_stock_threshold', 'expires_at', 'photo_url', 'pack_size', 'lot_number', 'condition', 'item_type', 'estimate_only'].forEach((f) => {
         if (body[f] !== undefined) update[f] = body[f];
       });
       // recompute status if relevant fields changed
@@ -136,28 +174,53 @@ exports.handler = async (event) => {
     // already set are never overwritten. body.kit_id is optional; omit it to
     // recategorize across every kit.
     if (method === 'POST' && body.action === 'recategorize') {
-      let query = supabase.from('items').select('id, name, category');
+      let query = supabase.from('items').select('id, name, category, item_type, quantity, low_stock_threshold, estimate_only');
       if (body.kit_id) query = query.eq('kit_id', body.kit_id);
       const { data: candidates, error: fetchErr } = await query;
       if (fetchErr) throw fetchErr;
 
-      const toUpdate = candidates.filter(
+      const needsCategory = candidates.filter(
         (i) => !i.category || i.category.trim() === '' || i.category === 'uncategorized'
+      );
+      const needsType = candidates.filter((i) => !i.item_type);
+      // Existing items logged as "1 pack" of something hard to count, still
+      // sitting on the old default threshold of 1, so they read as LOW
+      // even though nobody actually knows the real count.
+      const needsEstimateFlag = candidates.filter(
+        (i) => i.estimate_only == null && isBulkEstimateCandidate(i.name) && i.quantity <= (i.low_stock_threshold ?? 1)
       );
 
       let updated = 0;
-      for (const item of toUpdate) {
+      for (const item of needsCategory) {
         const category = inferCategory(item.name);
         if (category === 'uncategorized') continue; // nothing better to assign
         const { error: updateErr } = await supabase
           .from('items')
-          .update({ category })
+          .update({ category, item_type: item.item_type || inferItemType(category) })
           .eq('id', item.id);
         if (updateErr) throw updateErr;
         updated += 1;
       }
+      for (const item of needsType) {
+        if (needsCategory.some((c) => c.id === item.id)) continue; // already handled above
+        const { error: updateErr } = await supabase
+          .from('items')
+          .update({ item_type: inferItemType(item.category) })
+          .eq('id', item.id);
+        if (updateErr) throw updateErr;
+        updated += 1;
+      }
+      let flaggedEstimates = 0;
+      for (const item of needsEstimateFlag) {
+        const { error: updateErr } = await supabase
+          .from('items')
+          .update({ estimate_only: true, low_stock_threshold: 0, status: 'ok' })
+          .eq('id', item.id);
+        if (updateErr) throw updateErr;
+        flaggedEstimates += 1;
+      }
 
-      return respond(200, { checked: toUpdate.length, updated });
+      return respond(200, { checked: candidates.length, updated, flaggedEstimates });
     }
 
     if (method === 'POST' && body.action === 'duplicate_to_kit') {
@@ -173,6 +236,8 @@ exports.handler = async (event) => {
           kit_id: body.target_kit_id,
           name: original.name,
           category: original.category,
+          item_type: original.item_type,
+          estimate_only: original.estimate_only,
           quantity: original.quantity,
           low_stock_threshold: original.low_stock_threshold,
           expires_at: original.expires_at,
@@ -208,12 +273,12 @@ function computeStatus(quantity, threshold, expiresAt) {
 // Parses lines like "Gauze Pads 4x4 x10" or "Tourniquet, 3" or just "Tourniquet"
 function parseLine(line) {
   const trimmed = line.trim();
-  if (!trimmed) return { name: '', quantity: 0 };
+  if (!trimmed) return { name: '', quantity: 0, explicitQty: false };
   const xMatch = trimmed.match(/^(.*?)\s*[xX]\s*(\d+)$/);
-  if (xMatch) return { name: xMatch[1].trim(), quantity: parseInt(xMatch[2], 10) };
+  if (xMatch) return { name: xMatch[1].trim(), quantity: parseInt(xMatch[2], 10), explicitQty: true };
   const commaMatch = trimmed.match(/^(.*?),\s*(\d+)$/);
-  if (commaMatch) return { name: commaMatch[1].trim(), quantity: parseInt(commaMatch[2], 10) };
-  return { name: trimmed, quantity: 1 };
+  if (commaMatch) return { name: commaMatch[1].trim(), quantity: parseInt(commaMatch[2], 10), explicitQty: true };
+  return { name: trimmed, quantity: 1, explicitQty: false };
 }
 
 function respond(statusCode, body) {
