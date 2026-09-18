@@ -116,6 +116,8 @@ exports.handler = async (event) => {
           kit_id: newKit[0].id,
           name: item.name,
           category: item.category,
+          item_type: item.item_type,
+          estimate_only: item.estimate_only,
           quantity: item.quantity,
           low_stock_threshold: item.low_stock_threshold,
           expires_at: item.expires_at,
