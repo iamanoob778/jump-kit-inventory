@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory</title>
+<style>
+  :root{
+    --ink:#e8e4da;
+    --dim:#8a8577;
+    --panel:#1b1a17;
+    --panel2:#221f1a;
+    --line:#38352c;
+    --tag:#d68a2c;
+    --bg:#121110;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Courier New', ui-monospace, monospace;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+  }
+  header{
+    border-bottom:2px solid var(--tag);
+    padding:22px 28px 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .brand-eyebrow{
+    font-size:11px;
+    letter-spacing:0.22em;
+    color:var(--tag);
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Arial Narrow', Arial, sans-serif;
+    font-weight:800;
+    font-size:30px;
+    letter-spacing:0.02em;
+    margin:0;
+    text-transform:uppercase;
+  }
+  .meta-strip{
+    font-size:12px;
+    color:var(--dim);
+    text-align:right;
+    line-height:1.6;
+  }
+  main{
+    max-width:920px;
+    margin:0 auto;
+    padding:28px;
+  }
+  .toolbar{
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  button{
+    font-family:inherit;
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    background:var(--panel2);
+    color:var(--ink);
+    border:1px solid var(--line);
+    padding:9px 14px;
+    cursor:pointer;
+  }
+  button.primary{
+    background:var(--tag);
+    color:#1a1509;
+    border-color:var(--tag);
+    font-weight:700;
+  }
+  button:hover{border-color:var(--tag);}
+  button.primary:hover{filter:brightness(1.08);}
+
+  .kit{
+    background:var(--panel);
+    border:1px solid var(--line);
+    margin-bottom:14px;
+    position:relative;
+  }
+  .kit::before{
+    content:"";
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width:5px;
+    background:var(--tag);
+  }
+  .kit-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 18px 14px 22px;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .kit-photo{
+    width:64px;
+    height:64px;
+    object-fit:cover;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    flex-shrink:0;
+  }
+  .kit-photo-placeholder{
+    width:64px;
+    height:64px;
+    border:1px dashed var(--line);
+    background:var(--panel2);
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:9px;
+    color:var(--dim);
+    text-align:center;
+    letter-spacing:0.04em;
+    cursor:pointer;
+  }
+  .kit-photo-wrap{position:relative; flex-shrink:0;}
+  .kit-photo-wrap input[type=file]{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    cursor:pointer;
+  }
+  .kit-photo-wrap .kit-photo{cursor:pointer;}
+
+  .kit-toggle{
+    width:100%;
+    text-align:left;
+    background:transparent;
+    border:none;
+    border-top:1px solid var(--line);
+    color:var(--dim);
+    padding:9px 22px;
+    font-size:11px;
+    letter-spacing:0.08em;
+    cursor:pointer;
+  }
+  .kit-toggle:hover{color:var(--tag); border-color:var(--tag);}
+  .items-panel{
+    border-top:1px solid var(--line);
+    padding:14px 18px 16px 22px;
+    display:none;
+  }
+  .items-panel.open{display:block;}
+  .item-row{
+    display:grid;
+    grid-template-columns:34px 1fr 60px 90px 90px 90px 110px 90px auto;
+    gap:6px;
+    align-items:center;
+    padding:7px 0;
+    border-bottom:1px solid var(--line);
+    font-size:12px;
+  }
+  .item-photo{
+    width:34px;
+    height:34px;
+    object-fit:cover;
+    border:1px solid var(--line);
+    cursor:pointer;
+  }
+  .item-photo-placeholder{
+    width:34px;
+    height:34px;
+    border:1px dashed var(--line);
+    background:var(--panel2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    color:var(--dim);
+    cursor:pointer;
+  }
+  .item-photo-wrap{position:relative;}
+  .item-photo-wrap input[type=file]{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    cursor:pointer;
+  }
+  .item-row input, .item-row select{
+    background:var(--panel2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-family:inherit;
+    font-size:12px;
+    padding:5px 6px;
+    width:100%;
+  }
+  .status-pill{
+    font-size:10px;
+    letter-spacing:0.05em;
+    padding:3px 7px;
+    text-align:center;
+    text-transform:uppercase;
+  }
+  .status-ok{background:#1e2b1c; color:#7cb872;}
+  .status-low{background:#332a12; color:#d6ab4a;}
+  .status-expiring{background:#332a12; color:#d6ab4a;}
+  .status-expired{background:#331714; color:#e07a5f;}
+  .readiness-badge{
+    font-size:11px;
+    letter-spacing:0.03em;
+    padding:4px 10px;
+    border-radius:20px;
+    text-transform:uppercase;
+    white-space:nowrap;
+    align-self:flex-start;
+  }
+  .readiness-green{background:#1e2b1c; color:#7cb872;}
+  .readiness-yellow{background:#332a12; color:#d6ab4a;}
+  .readiness-red{background:#331714; color:#e07a5f;}
+  .overdue-text{color:#e07a5f;}
+  .bulk-add-box{
+    margin-top:10px;
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+  }
+  .bulk-add-box textarea{
+    flex:1;
+    background:var(--panel2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-family:inherit;
+    font-size:12px;
+    padding:8px;
+    min-height:60px;
+  }
+  .item-toolbar{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+  .item-toolbar input, .item-toolbar select{
+    background:var(--panel2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-family:inherit;
+    font-size:12px;
+    padding:6px 8px;
+  }
+  .undo-toast{
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .undo-toast button{padding:3px 8px; font-size:11px;}
+  .kit-id{
+    font-size:10px;
+    color:var(--dim);
+    letter-spacing:0.14em;
+  }
+  .kit-name{
+    font-family:'Arial Narrow', Arial, sans-serif;
+    font-size:19px;
+    font-weight:700;
+    text-transform:uppercase;
+    background:transparent;
+    border:none;
+    color:var(--ink);
+    padding:2px 0;
+    width:100%;
+  }
+  .kit-name:focus{
+    outline:none;
+    border-bottom:1px dashed var(--tag);
+  }
+  .kit-actions{display:flex; gap:8px;}
+  .kit-body{
+    border-top:1px solid var(--line);
+    padding:14px 18px 16px 22px;
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:14px;
+    align-items:start;
+  }
+  .kit-notes{
+    font-size:13px;
+    color:var(--dim);
+    background:transparent;
+    border:none;
+    resize:vertical;
+    min-height:38px;
+    width:100%;
+    font-family:inherit;
+    line-height:1.5;
+  }
+  .kit-notes:focus{outline:none; color:var(--ink);}
+  .kit-status{
+    font-size:11px;
+    text-align:right;
+    color:var(--dim);
+    white-space:nowrap;
+  }
+  .checked-btn{
+    display:block;
+    margin-top:6px;
+    font-size:10px;
+    padding:5px 9px;
+  }
+  .empty{
+    border:1px dashed var(--line);
+    padding:40px 24px;
+    text-align:center;
+    color:var(--dim);
+    font-size:13px;
+  }
+  .empty b{color:var(--ink); display:block; font-size:15px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;}
+  .new-kit-row{
+    display:flex;
+    gap:8px;
+    margin-top:18px;
+  }
+  .new-kit-row input{
+    flex:1;
+    background:var(--panel2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:9px 12px;
+    font-family:inherit;
+    font-size:13px;
+  }
+  .new-kit-row input:focus{outline:none; border-color:var(--tag);}
+  .toast{
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--panel2);
+    border:1px solid var(--tag);
+    padding:10px 18px;
+    font-size:12px;
+    letter-spacing:0.04em;
+    opacity:0;
+    transition:opacity 0.2s;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1;}
+  @media (max-width:520px){
+    header{padding:18px 16px;}
+    main{padding:18px;}
+    .meta-strip{text-align:left;}
+    .kit-body{grid-template-columns:1fr;}
+    .kit-status{text-align:left;}
+  }
+</style>
+</head>
+<body>
+<datalist id="category-suggestions">
+  <option value="Hemorrhage Control"></option>
+  <option value="Airway & Breathing"></option>
+  <option value="Splinting & Fractures"></option>
+  <option value="Burn Care"></option>
+  <option value="Wound Care"></option>
+  <option value="PPE"></option>
+  <option value="Medications"></option>
+  <option value="Environmental"></option>
+  <option value="Documentation"></option>
+  <option value="Hydration & Nutrition"></option>
+  <option value="Tools & Equipment"></option>
+</datalist>
+
+<header>
+  <div>
+    <div class="brand-eyebrow">Chamber Youth Taytung</div>
+    <h1>Inventory</h1>
+  </div>
+  <div class="meta-strip" id="metaStrip">— kits on record</div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button class="primary" onclick="document.getElementById('newKitInput').focus()">+ Add kit</button>
+    <button onclick="loadKits()">Refresh</button>
+    <input id="globalSearch" type="text" placeholder="Search items across all kits..." oninput="globalSearch(this.value)" style="flex:1; min-width:200px; background:var(--panel2); border:1px solid var(--line); color:var(--ink); padding:9px 12px; font-family:inherit; font-size:12px;" />
+  </div>
+  <div id="globalResults"></div>
+
+  <div id="kitList"></div>
+
+  <div class="new-kit-row">
+    <input id="newKitInput" type="text" placeholder="New kit name — e.g. Engine 2 Trauma Bag" />
+    <button class="primary" onclick="createKit()">Create</button>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const API = '/.netlify/functions/kits';
+const SUPABASE_URL = 'https://ywxvitgrmcxcoptsnxeu.supabase.co';
+const SUPABASE_ANON_KEY = 'PASTE_YOUR_ANON_KEY_HERE'; // same anon key as Sheets sync
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function loadKits(){
+  const list = document.getElementById('kitList');
+  try{
+    const res = await fetch(API);
+    const kits = await res.json();
+    document.getElementById('metaStrip').textContent =
+      kits.length + (kits.length === 1 ? ' kit on record' : ' kits on record');
+
+    if(!kits.length){
+      list.innerHTML = '<div class="empty"><b>No kits logged yet</b>Add the first kit below to start the manifest.</div>';
+      return;
+    }
+    allKitsCache = kits;
+    list.innerHTML = kits.map(renderKit).join('');
+  }catch(e){
+    list.innerHTML = '<div class="empty"><b>Manifest unreachable</b>Check that SUPABASE_URL and SUPABASE_ANON_KEY are set in Netlify, then refresh.</div>';
+  }
+}
+
+function renderKit(k){
+  const checked = k.last_checked_at
+    ? new Date(k.last_checked_at).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})
+    : 'never logged';
+
+  const daysSinceCheck = k.last_checked_at
+    ? Math.floor((Date.now() - new Date(k.last_checked_at)) / 86400000)
+    : null;
+  const overdue = daysSinceCheck === null || daysSinceCheck > 30;
+
+  const pct = k.readiness_pct ?? 100;
+  const readinessClass = pct >= 90 ? 'readiness-green' : pct >= 60 ? 'readiness-yellow' : 'readiness-red';
+
+  return `
+    <div class="kit" data-id="${k.id}">
+      <div class="kit-head">
+        <div class="kit-photo-wrap">
+          ${k.photo_url
+            ? `<img class="kit-photo" src="${k.photo_url}" alt="${escapeAttr(k.name)}" />`
+            : `<div class="kit-photo-placeholder">ADD<br>PHOTO</div>`}
+          <input type="file" accept="image/*" onchange="uploadPhoto('${k.id}', this)" />
+        </div>
+        <div style="flex:1; min-width:200px;">
+          <div class="kit-id">KIT-${k.id.slice(0,8).toUpperCase()}</div>
+          <input class="kit-name" value="${escapeAttr(k.name)}" onchange="renameKit('${k.id}', this.value)" />
+        </div>
+        <span class="readiness-badge ${readinessClass}" title="${k.flagged_items||0} of ${k.total_items||0} items need attention">
+          ${pct}% ready
+        </span>
+        <div class="kit-actions">
+          <button onclick="duplicateKit('${k.id}', '${escapeAttr(k.name)}')">Duplicate</button>
+          <button onclick="deleteKit('${k.id}')">Remove</button>
+        </div>
+      </div>
+      <div class="kit-body">
+        <textarea class="kit-notes" placeholder="Location, owner, contents notes..." onchange="updateNotes('${k.id}', this.value)">${escapeHtml(k.notes || '')}</textarea>
+        <div class="kit-status">
+          <span class="${overdue ? 'overdue-text' : ''}">
+            Last checked: ${checked}${daysSinceCheck !== null ? ` (${daysSinceCheck}d ago)` : ''}
+            ${overdue ? ' — overdue for inspection' : ''}
+          </span>
+          <button class="checked-btn" onclick="logCheck('${k.id}')">Log inspection</button>
+          <button class="checked-btn" onclick="viewCheckHistory('${k.id}', '${escapeAttr(k.name)}')">History</button>
+        </div>
+      </div>
+      <button class="kit-toggle" onclick="toggleItems('${k.id}')" id="toggle-${k.id}">▸ Show items</button>
+      <div class="items-panel" id="items-${k.id}"></div>
+    </div>`;
+}
+
+async function logCheck(kitId){
+  const checkedBy = prompt('Your name (for the log):', localStorage.getItem('jk_checked_by') || '');
+  if(checkedBy === null) return;
+  localStorage.setItem('jk_checked_by', checkedBy);
+  const notes = prompt('Notes for this check (optional):', '') || '';
+
+  const res = await fetch('/.netlify/functions/checks', {
+    method: 'POST',
+    body: JSON.stringify({ kit_id: kitId, checked_by: checkedBy, notes })
+  });
+  const result = await res.json();
+  showToast(`Logged: ${result.items_ok} ok, ${result.items_flagged} flagged`);
+  loadKits();
+  if(openPanels[kitId]) loadItems(kitId);
+}
+
+async function viewCheckHistory(kitId, kitName){
+  const res = await fetch(`/.netlify/functions/checks?kit_id=${kitId}`);
+  const checks = await res.json();
+  if(!checks.length){
+    alert(`No inspections logged yet for ${kitName}.`);
+    return;
+  }
+  const lines = checks.map(c => {
+    const date = new Date(c.checked_at).toLocaleString();
+    return `${date} — ${c.checked_by || 'unknown'} — ${c.items_ok} ok / ${c.items_flagged} flagged${c.notes ? ' — ' + c.notes : ''}`;
+  });
+  alert(`Inspection history for ${kitName}:\n\n${lines.join('\n')}`);
+}
+
+let allKitsCache = [];
+let openPanels = {};
+let itemFilters = {}; // per kit: {sort, category, status}
+let lastDeleted = null;
+
+function toggleItems(kitId){
+  const panel = document.getElementById('items-'+kitId);
+  const btn = document.getElementById('toggle-'+kitId);
+  const isOpen = panel.classList.toggle('open');
+  openPanels[kitId] = isOpen;
+  btn.textContent = isOpen ? '▾ Hide items' : '▸ Show items';
+  if(isOpen) loadItems(kitId);
+}
+
+async function loadItems(kitId){
+  const panel = document.getElementById('items-'+kitId);
+  panel.innerHTML = 'Loading...';
+  const res = await fetch(`/.netlify/functions/items?kit_id=${kitId}`);
+  let items = await res.json();
+  renderItemsPanel(kitId, items);
+}
+
+function renderItemsPanel(kitId, items){
+  const panel = document.getElementById('items-'+kitId);
+  const f = itemFilters[kitId] || {sort:'name', category:'', status:''};
+
+  let filtered = items.filter(i =>
+    (!f.category || i.category === f.category) &&
+    (!f.status || i.status === f.status)
+  );
+  filtered.sort((a,b) => {
+    if(f.sort === 'name') return a.name.localeCompare(b.name);
+    if(f.sort === 'category') return (a.category||'').localeCompare(b.category||'') || a.name.localeCompare(b.name);
+    return (a[f.sort]||0) - (b[f.sort]||0);
+  });
+
+  const categories = [...new Set(items.map(i => i.category))];
+
+  panel.innerHTML = `
+    <div class="item-toolbar">
+      <select onchange="setFilter('${kitId}','category',this.value)">
+        <option value="">All categories</option>
+        ${categories.map(c => `<option value="${c}" ${f.category===c?'selected':''}>${c}</option>`).join('')}
+      </select>
+      <select onchange="setFilter('${kitId}','status',this.value)">
+        <option value="">All statuses</option>
+        <option value="ok" ${f.status==='ok'?'selected':''}>OK</option>
+        <option value="low" ${f.status==='low'?'selected':''}>Low</option>
+        <option value="expiring" ${f.status==='expiring'?'selected':''}>Expiring</option>
+        <option value="expired" ${f.status==='expired'?'selected':''}>Expired</option>
+      </select>
+      <select onchange="setFilter('${kitId}','sort',this.value)">
+        <option value="name" ${f.sort==='name'?'selected':''}>Sort A-Z</option>
+        <option value="quantity" ${f.sort==='quantity'?'selected':''}>Sort by qty</option>
+        <option value="category" ${f.sort==='category'?'selected':''}>Sort by category</option>
+      </select>
+      <button onclick="recategorizeKit('${kitId}')" title="Auto-fill category for items that don't have one yet">Auto-categorize</button>
+    </div>
+    ${filtered.length ? filtered.map(i => renderItemRow(kitId, i)).join('') : '<div style="color:var(--dim); font-size:12px; padding:8px 0;">No items match.</div>'}
+    <div class="bulk-add-box">
+      <textarea id="bulk-${kitId}" placeholder="Paste items, one per line — e.g.&#10;Gauze Pads 4x4 x10&#10;Tourniquet&#10;Trauma Shears, 2"></textarea>
+      <button class="primary" onclick="bulkAdd('${kitId}')">Add all</button>
+    </div>`;
+}
+
+function renderItemRow(kitId, i){
+  return `
+    <div class="item-row" data-item-id="${i.id}">
+      <div class="item-photo-wrap">
+        ${i.photo_url
+          ? `<img class="item-photo" src="${i.photo_url}" alt="" />`
+          : `<div class="item-photo-placeholder">+</div>`}
+        <input type="file" accept="image/*" onchange="uploadItemPhoto('${kitId}','${i.id}', this)" />
+      </div>
+      <input value="${escapeAttr(i.name)}" onchange="updateItem('${kitId}','${i.id}','name',this.value)" />
+      <input type="number" value="${i.quantity}" onchange="updateItem('${kitId}','${i.id}','quantity',parseInt(this.value)||0)" />
+      <input value="${escapeAttr(i.category||'')}" placeholder="category" list="category-suggestions" onchange="updateItem('${kitId}','${i.id}','category',this.value)" />
+      <input value="${escapeAttr(i.pack_size||'')}" placeholder="e.g. 100ml" onchange="updateItem('${kitId}','${i.id}','pack_size',this.value)" />
+      <input value="${escapeAttr(i.lot_number||'')}" placeholder="lot #" onchange="updateItem('${kitId}','${i.id}','lot_number',this.value)" />
+      <select onchange="updateItem('${kitId}','${i.id}','condition',this.value)">
+        <option value="sealed" ${i.condition==='sealed'?'selected':''}>Sealed</option>
+        <option value="opened" ${i.condition==='opened'?'selected':''}>Opened</option>
+        <option value="needs_replacement" ${i.condition==='needs_replacement'?'selected':''}>Needs replacement</option>
+      </select>
+      <span class="status-pill status-${i.status}">${i.status}</span>
+      <div style="display:flex; gap:4px;">
+        <button onclick="duplicateItemPrompt('${i.id}')" title="Duplicate to another kit">⧉</button>
+        <button onclick="deleteItem('${kitId}','${i.id}')" title="Delete">✕</button>
+      </div>
+    </div>`;
+}
+
+async function uploadItemPhoto(kitId, itemId, input){
+  const file = input.files[0];
+  if(!file) return;
+  showToast('Uploading photo...');
+  const ext = file.name.split('.').pop();
+  const path = `item-${itemId}-${Date.now()}.${ext}`;
+
+  const { error: uploadErr } = await sb.storage.from('kit-photos').upload(path, file, { upsert: true });
+  if(uploadErr){
+    showToast('Upload failed');
+    return;
+  }
+  const { data } = sb.storage.from('kit-photos').getPublicUrl(path);
+  await fetch('/.netlify/functions/items', {method:'POST', body: JSON.stringify({action:'update', id: itemId, photo_url: data.publicUrl})});
+  showToast('Photo saved');
+  loadItems(kitId);
+}
+
+function setFilter(kitId, key, value){
+  itemFilters[kitId] = {...(itemFilters[kitId]||{sort:'name',category:'',status:''}), [key]: value};
+  loadItems(kitId);
+}
+
+async function bulkAdd(kitId){
+  const ta = document.getElementById('bulk-'+kitId);
+  const lines = ta.value.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!lines.length) return;
+  await fetch('/.netlify/functions/items', {method:'POST', body: JSON.stringify({action:'bulk_add', kit_id: kitId, lines})});
+  ta.value = '';
+  showToast(lines.length + ' items added');
+  loadItems(kitId);
+}
+
+async function recategorizeKit(kitId){
+  showToast('Auto-categorizing...');
+  const res = await fetch('/.netlify/functions/items', {method:'POST', body: JSON.stringify({action:'recategorize', kit_id: kitId})});
+  const result = await res.json();
+  showToast(result.updated ? `Categorized ${result.updated} item(s)` : 'Nothing to categorize');
+  loadItems(kitId);
+}
+
+async function updateItem(kitId, itemId, field, value){
+  await fetch('/.netlify/functions/items', {method:'POST', body: JSON.stringify({action:'update', id: itemId, [field]: value})});
+  showToast('Saved');
+  loadItems(kitId);
+}
+
+function duplicateItemPrompt(itemId){
+  const target = prompt('Paste the target kit ID (shown on each kit card, e.g. KIT-XXXXXXXX):');
+  if(!target) return;
+  // allow either full uuid or the short displayed id — match against cache
+  const match = allKitsCache.find(k => k.id.startsWith(target.replace('KIT-','').toLowerCase()) || k.id === target);
+  if(!match){ showToast('Kit not found'); return; }
+  fetch('/.netlify/functions/items', {method:'POST', body: JSON.stringify({action:'duplicate_to_kit', id: itemId, target_kit_id: match.id})})
+    .then(()=> showToast('Duplicated to ' + match.name));
+}
+
+async function deleteItem(kitId, itemId){
+  const row = document.querySelector(`[data-item-id="${itemId}"]`);
+  const snapshot = row ? row.outerHTML : null;
+  lastDeleted = {kitId, itemId};
+  if(row) row.style.opacity = '0.3';
+
+  showUndoToast('Item removed', async () => {
+    lastDeleted = null;
+    loadItems(kitId);
+  });
+
+  setTimeout(async () => {
+    if(lastDeleted && lastDeleted.itemId === itemId){
+      await fetch('/.netlify/functions/items', {method:'DELETE', body: JSON.stringify({id: itemId})});
+      lastDeleted = null;
+      loadItems(kitId);
+    }
+  }, 4000);
+}
+
+function showUndoToast(msg, onUndo){
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span class="undo-toast">${msg} <button onclick="(${onUndo.toString()})()">Undo</button></span>`;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), 4000);
+}
+
+let globalSearchTimer;
+function globalSearch(q){
+  clearTimeout(globalSearchTimer);
+  const results = document.getElementById('globalResults');
+  if(!q.trim()){ results.innerHTML=''; return; }
+  globalSearchTimer = setTimeout(async () => {
+    const res = await fetch(`/.netlify/functions/items?search=${encodeURIComponent(q)}`);
+    const items = await res.json();
+    if(!items.length){ results.innerHTML = '<div class="empty" style="margin-bottom:16px;">No items match.</div>'; return; }
+    results.innerHTML = `<div class="kit" style="margin-bottom:16px;"><div class="kit-body" style="grid-template-columns:1fr; padding-top:14px;">
+      ${items.map(i => `<div class="item-row" style="grid-template-columns:1fr 60px 120px 90px;">
+        <span>${escapeHtml(i.name)}</span>
+        <span>${i.quantity}</span>
+        <span style="color:var(--dim); font-size:11px;">${escapeHtml(i.kits?.name || '')}</span>
+        <span class="status-pill status-${i.status}">${i.status}</span>
+      </div>`).join('')}
+    </div></div>`;
+  }, 300);
+}
+
+async function createKit(){
+  const input = document.getElementById('newKitInput');
+  const name = input.value.trim();
+  if(!name) return;
+  await fetch(API, {method:'POST', body: JSON.stringify({name})});
+  input.value = '';
+  showToast('Kit added');
+  loadKits();
+}
+
+async function renameKit(id, name){
+  if(!name.trim()) return;
+  await fetch(API, {method:'POST', body: JSON.stringify({action:'rename', id, name})});
+  showToast('Renamed');
+}
+
+async function updateNotes(id, notes){
+  await fetch(API, {method:'POST', body: JSON.stringify({action:'update_notes', id, notes})});
+  showToast('Notes saved');
+}
+
+async function markChecked(id){
+  await fetch(API, {method:'POST', body: JSON.stringify({action:'mark_checked', id})});
+  showToast('Logged as checked');
+  loadKits();
+}
+
+async function duplicateKit(id, name){
+  await fetch(API, {method:'POST', body: JSON.stringify({action:'duplicate', id, newName: name + ' (copy)'})});
+  showToast('Kit duplicated');
+  loadKits();
+}
+
+async function deleteKit(id){
+  if(!confirm("Remove this kit and its items? This can't be undone.")) return;
+  await fetch(API, {method:'DELETE', body: JSON.stringify({id})});
+  showToast('Kit removed');
+  loadKits();
+}
+
+async function uploadPhoto(kitId, input){
+  const file = input.files[0];
+  if(!file) return;
+  showToast('Uploading photo...');
+  const ext = file.name.split('.').pop();
+  const path = `${kitId}-${Date.now()}.${ext}`;
+
+  const { error: uploadErr } = await sb.storage.from('kit-photos').upload(path, file, { upsert: true });
+  if(uploadErr){
+    showToast('Upload failed — check storage bucket exists');
+    return;
+  }
+  const { data } = sb.storage.from('kit-photos').getPublicUrl(path);
+  await fetch(API, {method:'POST', body: JSON.stringify({action:'update_photo', id: kitId, photo_url: data.publicUrl})});
+  showToast('Photo saved');
+  loadKits();
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s){
+  return escapeHtml(s).replace(/"/g,'&quot;');
+}
+
+loadKits();
+</script>
+</body>
+</html>
