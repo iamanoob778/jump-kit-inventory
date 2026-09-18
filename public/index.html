@@ -158,13 +158,65 @@
   .items-panel.open{display:block;}
   .item-row{
     display:grid;
-    grid-template-columns:34px 1fr 60px 90px 90px 90px 110px 90px auto;
+    grid-template-columns:34px 1fr 60px 90px 90px 90px 110px 30px 90px auto;
     gap:6px;
     align-items:center;
     padding:7px 0;
     border-bottom:1px solid var(--line);
     font-size:12px;
   }
+  .type-group{
+    margin-bottom:14px;
+    border:1px solid var(--line);
+  }
+  .type-group > summary{
+    list-style:none;
+    cursor:pointer;
+    padding:9px 12px;
+    background:var(--panel2);
+    font-family:'Arial Narrow', Arial, sans-serif;
+    font-weight:800;
+    font-size:13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--tag);
+    border-left:3px solid var(--tag);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .type-group > summary::-webkit-details-marker{display:none;}
+  .type-group > summary::before{content:"▸ "; }
+  .type-group[open] > summary::before{content:"▾ ";}
+  .type-group-body{padding:4px 12px 8px;}
+  .cat-group{margin-top:6px; border-top:1px dashed var(--line);}
+  .cat-group:first-child{border-top:none; margin-top:0;}
+  .cat-group > summary{
+    list-style:none;
+    cursor:pointer;
+    padding:8px 2px;
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--dim);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .cat-group > summary:hover{color:var(--ink);}
+  .cat-group > summary::-webkit-details-marker{display:none;}
+  .cat-group > summary::before{content:"▸ ";}
+  .cat-group[open] > summary::before{content:"▾ ";}
+  .group-count{
+    font-size:10px;
+    color:var(--dim);
+    background:var(--bg);
+    border:1px solid var(--line);
+    padding:1px 7px;
+    border-radius:10px;
+  }
+  .est-toggle{width:16px; height:16px; cursor:pointer; accent-color:var(--tag);}
+  .status-estimate{background:#182531; color:#7aa8c9;}
   .item-photo{
     width:34px;
     height:34px;
@@ -531,11 +583,12 @@ async function loadItems(kitId){
 
 function renderItemsPanel(kitId, items){
   const panel = document.getElementById('items-'+kitId);
-  const f = itemFilters[kitId] || {sort:'name', category:'', status:''};
+  const f = itemFilters[kitId] || {sort:'name', category:'', status:'', type:''};
 
   let filtered = items.filter(i =>
     (!f.category || i.category === f.category) &&
-    (!f.status || i.status === f.status)
+    (!f.status || i.status === f.status) &&
+    (!f.type || (i.item_type === f.type || (f.type==='consumable' && !i.item_type)))
   );
   filtered.sort((a,b) => {
     if(f.sort === 'name') return a.name.localeCompare(b.name);
@@ -547,6 +600,11 @@ function renderItemsPanel(kitId, items){
 
   panel.innerHTML = `
     <div class="item-toolbar">
+      <select onchange="setFilter('${kitId}','type',this.value)">
+        <option value="">View: All</option>
+        <option value="durable" ${f.type==='durable'?'selected':''}>Durables</option>
+        <option value="consumable" ${f.type==='consumable'?'selected':''}>Consumables</option>
+      </select>
       <select onchange="setFilter('${kitId}','category',this.value)">
         <option value="">All categories</option>
         ${categories.map(c => `<option value="${c}" ${f.category===c?'selected':''}>${c}</option>`).join('')}
@@ -563,16 +621,56 @@ function renderItemsPanel(kitId, items){
         <option value="quantity" ${f.sort==='quantity'?'selected':''}>Sort by qty</option>
         <option value="category" ${f.sort==='category'?'selected':''}>Sort by category</option>
       </select>
-      <button onclick="recategorizeKit('${kitId}')" title="Auto-fill category for items that don't have one yet">Auto-categorize</button>
+      <button class="primary" onclick="recategorizeKit('${kitId}')" title="Auto-fill missing categories, sort durable vs. consumable, and flag hard-to-count bulk items (gloves, masks, gauze) so they stop reading LOW">✨ AI Audit &amp; Sort</button>
     </div>
-    ${filtered.length ? filtered.map(i => renderItemRow(kitId, i)).join('') : '<div style="color:var(--dim); font-size:12px; padding:8px 0;">No items match.</div>'}
+    ${filtered.length ? renderGroupedItems(kitId, filtered) : '<div style="color:var(--dim); font-size:12px; padding:8px 0;">No items match.</div>'}
     <div class="bulk-add-box">
-      <textarea id="bulk-${kitId}" placeholder="Paste items, one per line — e.g.&#10;Gauze Pads 4x4 x10&#10;Tourniquet&#10;Trauma Shears, 2"></textarea>
+      <textarea id="bulk-${kitId}" placeholder="Paste items, one per line — e.g.&#10;Gauze Pads 4x4 x10&#10;Tourniquet&#10;Nitrile Gloves&#10;Trauma Shears, 2"></textarea>
       <button class="primary" onclick="bulkAdd('${kitId}')">Add all</button>
     </div>`;
 }
 
+// Groups items into DURABLE EQUIPMENT / CONSUMABLE SUPPLIES, then by
+// category within each, as collapsible <details> sections.
+function renderGroupedItems(kitId, items){
+  const TYPE_LABELS = { durable: 'Durable Equipment', consumable: 'Consumable Supplies' };
+  const order = ['durable', 'consumable'];
+  const groups = { durable: {}, consumable: {} };
+
+  items.forEach(i => {
+    const type = i.item_type === 'durable' ? 'durable' : 'consumable';
+    const cat = i.category || 'Uncategorized';
+    (groups[type][cat] = groups[type][cat] || []).push(i);
+  });
+
+  return order.map(type => {
+    const cats = Object.keys(groups[type]).sort();
+    if(!cats.length) return '';
+    const total = cats.reduce((sum, c) => sum + groups[type][c].length, 0);
+    return `
+      <details class="type-group" open>
+        <summary>${TYPE_LABELS[type]} <span class="group-count">${total}</span></summary>
+        <div class="type-group-body">
+          ${cats.map(cat => `
+            <details class="cat-group" open>
+              <summary>${escapeHtml(cat)} <span class="group-count">${groups[type][cat].length}</span></summary>
+              ${groups[type][cat].map(i => renderItemRow(kitId, i)).join('')}
+            </details>
+          `).join('')}
+        </div>
+      </details>`;
+  }).join('');
+}
+
 function renderItemRow(kitId, i){
+  // If quantity is a rough estimate (e.g. "1 pack" of gloves/masks/gauze
+  // rather than a real count), don't show an alarming red LOW badge just
+  // because the number happens to be small — show a neutral "verify" badge
+  // instead. The underlying status is preserved server-side either way.
+  const softened = i.estimate_only && i.status === 'low';
+  const pillClass = softened ? 'status-estimate' : `status-${i.status}`;
+  const pillText = softened ? '~ verify' : i.status;
+
   return `
     <div class="item-row" data-item-id="${i.id}">
       <div class="item-photo-wrap">
@@ -591,7 +689,8 @@ function renderItemRow(kitId, i){
         <option value="opened" ${i.condition==='opened'?'selected':''}>Opened</option>
         <option value="needs_replacement" ${i.condition==='needs_replacement'?'selected':''}>Needs replacement</option>
       </select>
-      <span class="status-pill status-${i.status}">${i.status}</span>
+      <input type="checkbox" class="est-toggle" ${i.estimate_only?'checked':''} title="Quantity is a rough estimate (e.g. '1 pack') — don't flag as LOW based on this number" onchange="updateItem('${kitId}','${i.id}','estimate_only',this.checked)" />
+      <span class="status-pill ${pillClass}" title="${softened ? 'Marked as estimated — physically check remaining supply' : ''}">${pillText}</span>
       <div style="display:flex; gap:4px;">
         <button onclick="duplicateItemPrompt('${i.id}')" title="Duplicate to another kit">⧉</button>
         <button onclick="deleteItem('${kitId}','${i.id}')" title="Delete">✕</button>
@@ -618,7 +717,7 @@ async function uploadItemPhoto(kitId, itemId, input){
 }
 
 function setFilter(kitId, key, value){
-  itemFilters[kitId] = {...(itemFilters[kitId]||{sort:'name',category:'',status:''}), [key]: value};
+  itemFilters[kitId] = {...(itemFilters[kitId]||{sort:'name',category:'',status:'',type:''}), [key]: value};
   loadItems(kitId);
 }
 
@@ -633,15 +732,27 @@ async function bulkAdd(kitId){
 }
 
 async function recategorizeKit(kitId){
-  showToast('Auto-categorizing...');
+  showToast('Running AI audit...');
   const res = await fetch('/.netlify/functions/items', {method:'POST', body: JSON.stringify({action:'recategorize', kit_id: kitId})});
   const result = await res.json();
-  showToast(result.updated ? `Categorized ${result.updated} item(s)` : 'Nothing to categorize');
+  const parts = [];
+  if(result.updated) parts.push(`${result.updated} categorized/sorted`);
+  if(result.flaggedEstimates) parts.push(`${result.flaggedEstimates} flagged as estimates`);
+  showToast(parts.length ? parts.join(', ') : 'Nothing to audit — all clean');
   loadItems(kitId);
 }
 
+// Mirrors the server's DURABLE_CATEGORIES so the grouped view updates
+// immediately when someone hand-edits a category, without a separate audit.
+const DURABLE_CATEGORIES = ['Splinting & Fractures', 'Tools & Equipment'];
+function inferItemTypeClient(category){
+  return DURABLE_CATEGORIES.includes(category) ? 'durable' : 'consumable';
+}
+
 async function updateItem(kitId, itemId, field, value){
-  await fetch('/.netlify/functions/items', {method:'POST', body: JSON.stringify({action:'update', id: itemId, [field]: value})});
+  const payload = {action:'update', id: itemId, [field]: value};
+  if(field === 'category') payload.item_type = inferItemTypeClient(value);
+  await fetch('/.netlify/functions/items', {method:'POST', body: JSON.stringify(payload)});
   showToast('Saved');
   loadItems(kitId);
 }
