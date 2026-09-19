@@ -4,28 +4,44 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventory</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#F4F4F0">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#e8e4da;
-    --dim:#8a8577;
-    --panel:#1b1a17;
-    --panel2:#221f1a;
-    --line:#38352c;
-    --tag:#d68a2c;
-    --bg:#121110;
+    --ink:#0f172a;
+    --dim:#475569;
+    --panel:#ffffff;
+    --panel2:#f4f4f0;
+    --line:#cbd5e1;
+    --line-strong:#94a3b8;
+    --tag:#0f172a;
+    --tag-contrast:#ffffff;
+    --bg:#f4f4f0;
+    --radius:3px;
+    --ok-bg:#dcfce7;   --ok-text:#14532d;
+    --low-bg:#fffbeb;  --low-text:#92400e;
+    --exp-bg:#fee2e2;  --exp-text:#b91c1c;
+    --est-bg:#eeeee8;  --est-text:#57534e;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     background:var(--bg);
     color:var(--ink);
-    font-family:'Courier New', ui-monospace, monospace;
-    background-image:
-      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    font-family:'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
   }
   header{
-    border-bottom:2px solid var(--tag);
-    padding:22px 28px 18px;
+    border-bottom:1px solid var(--ink);
+    background:var(--panel);
+    padding:20px 28px;
     display:flex;
     justify-content:space-between;
     align-items:flex-end;
@@ -34,89 +50,87 @@
   }
   .brand-eyebrow{
     font-size:11px;
-    letter-spacing:0.22em;
-    color:var(--tag);
+    letter-spacing:0.1em;
+    color:var(--dim);
     text-transform:uppercase;
-    margin-bottom:6px;
+    margin-bottom:4px;
+    font-weight:600;
   }
   h1{
-    font-family:'Arial Narrow', Arial, sans-serif;
-    font-weight:800;
-    font-size:30px;
-    letter-spacing:0.02em;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:-0.01em;
     margin:0;
-    text-transform:uppercase;
+    color:var(--ink);
   }
   .meta-strip{
+    font-family:'JetBrains Mono', monospace;
     font-size:12px;
     color:var(--dim);
     text-align:right;
     line-height:1.6;
   }
   main{
-    max-width:920px;
+    max-width:960px;
     margin:0 auto;
-    padding:28px;
+    padding:24px;
   }
   .toolbar{
     display:flex;
-    gap:10px;
-    margin-bottom:18px;
+    gap:8px;
+    margin-bottom:16px;
     flex-wrap:wrap;
   }
   button{
-    font-family:inherit;
+    font-family:'Space Grotesk', sans-serif;
     font-size:12px;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    background:var(--panel2);
+    font-weight:600;
+    background:#ffffff;
     color:var(--ink);
-    border:1px solid var(--line);
-    padding:9px 14px;
+    border:1px solid var(--ink);
+    border-radius:var(--radius);
+    padding:7px 12px;
     cursor:pointer;
+    transition:background 0.1s;
   }
   button.primary{
-    background:var(--tag);
-    color:#1a1509;
-    border-color:var(--tag);
+    background:var(--ink);
+    color:var(--tag-contrast);
+    border-color:var(--ink);
     font-weight:700;
   }
-  button:hover{border-color:var(--tag);}
-  button.primary:hover{filter:brightness(1.08);}
+  button:hover{background:var(--panel2);}
+  button.primary:hover{background:#1e293b;}
 
   .kit{
     background:var(--panel);
-    border:1px solid var(--line);
-    margin-bottom:14px;
-    position:relative;
-  }
-  .kit::before{
-    content:"";
-    position:absolute;
-    left:0; top:0; bottom:0;
-    width:5px;
-    background:var(--tag);
+    border:1px solid var(--ink);
+    border-radius:var(--radius);
+    margin-bottom:12px;
   }
   .kit-head{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:14px 18px 14px 22px;
+    padding:14px 18px;
     gap:14px;
     flex-wrap:wrap;
   }
   .kit-photo{
-    width:64px;
-    height:64px;
+    width:56px;
+    height:56px;
     object-fit:cover;
     border:1px solid var(--line);
+    border-radius:var(--radius);
     background:var(--panel2);
     flex-shrink:0;
   }
   .kit-photo-placeholder{
-    width:64px;
-    height:64px;
-    border:1px dashed var(--line);
+    width:56px;
+    height:56px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
     background:var(--panel2);
     flex-shrink:0;
     display:flex;
@@ -143,60 +157,109 @@
     background:transparent;
     border:none;
     border-top:1px solid var(--line);
+    border-radius:0;
     color:var(--dim);
-    padding:9px 22px;
-    font-size:11px;
-    letter-spacing:0.08em;
+    padding:9px 18px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:12px;
+    font-weight:600;
     cursor:pointer;
   }
-  .kit-toggle:hover{color:var(--tag); border-color:var(--tag);}
+  .kit-toggle:hover{color:var(--ink); background:var(--panel2);}
   .items-panel{
     border-top:1px solid var(--line);
-    padding:14px 18px 16px 22px;
+    padding:14px 18px 16px;
     display:none;
   }
   .items-panel.open{display:block;}
   .item-row{
+    padding:9px 0;
+    border-bottom:1px solid var(--line);
+    font-size:13px;
+  }
+  .item-row-main{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .item-name-input{
+    flex:1;
+    min-width:0;
+    font-family:'JetBrains Mono', monospace !important;
+    font-size:13px !important;
+    font-weight:600;
+    padding:6px 8px !important;
+  }
+  .item-row-actions{display:flex; gap:4px; flex-shrink:0;}
+  .item-row-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 10px;
+    margin-top:6px;
+    margin-left:42px;
+  }
+  .item-row-meta label{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    font-size:9px;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--dim);
+    font-weight:700;
+  }
+  .item-row-meta input, .item-row-meta select{width:92px;}
+  .item-row-meta .est-field{
+    flex-direction:row;
+    align-items:center;
+    gap:5px;
+    align-self:flex-end;
+    padding-bottom:5px;
+  }
+  .search-row{
     display:grid;
-    grid-template-columns:34px 1fr 60px 90px 90px 90px 110px 30px 90px auto;
+    grid-template-columns:1fr 60px 120px 90px;
     gap:6px;
     align-items:center;
-    padding:7px 0;
+    padding:8px 0;
     border-bottom:1px solid var(--line);
-    font-size:12px;
+    font-size:13px;
   }
   .type-group{
-    margin-bottom:14px;
-    border:1px solid var(--line);
+    margin-bottom:12px;
+    border:1px solid var(--ink);
+    border-radius:var(--radius);
+    overflow:hidden;
   }
   .type-group > summary{
     list-style:none;
     cursor:pointer;
-    padding:9px 12px;
+    padding:10px 14px;
     background:var(--panel2);
-    font-family:'Arial Narrow', Arial, sans-serif;
-    font-weight:800;
-    font-size:13px;
-    letter-spacing:0.08em;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:0.06em;
     text-transform:uppercase;
-    color:var(--tag);
-    border-left:3px solid var(--tag);
+    color:var(--ink);
+    border-left:3px solid var(--ink);
     display:flex;
     justify-content:space-between;
     align-items:center;
   }
   .type-group > summary::-webkit-details-marker{display:none;}
-  .type-group > summary::before{content:"▸ "; }
-  .type-group[open] > summary::before{content:"▾ ";}
-  .type-group-body{padding:4px 12px 8px;}
-  .cat-group{margin-top:6px; border-top:1px dashed var(--line);}
+  .type-group > summary::before{content:"▸ "; color:var(--dim);}
+  .type-group[open] > summary::before{content:"▾ "; color:var(--dim);}
+  .type-group-body{padding:4px 14px 8px;}
+  .cat-group{margin-top:4px; border-top:1px dashed var(--line);}
   .cat-group:first-child{border-top:none; margin-top:0;}
   .cat-group > summary{
     list-style:none;
     cursor:pointer;
-    padding:8px 2px;
+    padding:9px 2px;
     font-size:11px;
-    letter-spacing:0.06em;
+    font-weight:700;
+    letter-spacing:0.05em;
     text-transform:uppercase;
     color:var(--dim);
     display:flex;
@@ -208,26 +271,40 @@
   .cat-group > summary::before{content:"▸ ";}
   .cat-group[open] > summary::before{content:"▾ ";}
   .group-count{
+    font-family:'JetBrains Mono', monospace;
     font-size:10px;
+    font-weight:600;
     color:var(--dim);
-    background:var(--bg);
+    background:var(--panel2);
     border:1px solid var(--line);
     padding:1px 7px;
-    border-radius:10px;
+    border-radius:var(--radius);
   }
-  .est-toggle{width:16px; height:16px; cursor:pointer; accent-color:var(--tag);}
-  .status-estimate{background:#182531; color:#7aa8c9;}
+  .est-toggle{width:16px; height:16px; cursor:pointer; accent-color:var(--ink);}
+  .status-estimate{background:var(--est-bg); color:var(--est-text);}
+  .qty-stepper{display:flex; align-items:center; gap:3px;}
+  .qty-stepper button{padding:2px 7px; font-size:12px; line-height:1;}
+  .qty-stepper input{font-family:'JetBrains Mono', monospace; width:42px !important; text-align:center;}
+  .restock-btn{
+    background:var(--low-bg); color:var(--low-text); border:1px solid #fcd34d;
+    border-radius:var(--radius);
+    font-family:'Space Grotesk', sans-serif;
+    font-size:10px; font-weight:700; padding:3px 8px; white-space:nowrap;
+  }
+  .restock-btn:hover{filter:brightness(0.97);}
   .item-photo{
     width:34px;
     height:34px;
     object-fit:cover;
     border:1px solid var(--line);
+    border-radius:var(--radius);
     cursor:pointer;
   }
   .item-photo-placeholder{
     width:34px;
     height:34px;
-    border:1px dashed var(--line);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
     background:var(--panel2);
     display:flex;
     align-items:center;
@@ -244,38 +321,49 @@
     cursor:pointer;
   }
   .item-row input, .item-row select{
-    background:var(--panel2);
-    border:1px solid var(--line);
+    background:#ffffff;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
     color:var(--ink);
     font-family:inherit;
     font-size:12px;
     padding:5px 6px;
     width:100%;
   }
+  .item-row input:focus, .item-row select:focus,
+  .item-toolbar input:focus, .item-toolbar select:focus{
+    outline:none;
+    border-color:var(--ink);
+  }
   .status-pill{
+    font-family:'Space Grotesk', sans-serif;
     font-size:10px;
-    letter-spacing:0.05em;
-    padding:3px 7px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    padding:3px 8px;
+    border-radius:var(--radius);
     text-align:center;
     text-transform:uppercase;
   }
-  .status-ok{background:#1e2b1c; color:#7cb872;}
-  .status-low{background:#332a12; color:#d6ab4a;}
-  .status-expiring{background:#332a12; color:#d6ab4a;}
-  .status-expired{background:#331714; color:#e07a5f;}
+  .status-ok{background:var(--ok-bg); color:var(--ok-text);}
+  .status-low{background:var(--low-bg); color:var(--low-text);}
+  .status-expiring{background:var(--low-bg); color:var(--low-text);}
+  .status-expired{background:var(--exp-bg); color:var(--exp-text);}
   .readiness-badge{
+    font-family:'JetBrains Mono', monospace;
     font-size:11px;
-    letter-spacing:0.03em;
+    font-weight:700;
+    letter-spacing:0.01em;
     padding:4px 10px;
-    border-radius:20px;
+    border-radius:var(--radius);
     text-transform:uppercase;
     white-space:nowrap;
     align-self:flex-start;
   }
-  .readiness-green{background:#1e2b1c; color:#7cb872;}
-  .readiness-yellow{background:#332a12; color:#d6ab4a;}
-  .readiness-red{background:#331714; color:#e07a5f;}
-  .overdue-text{color:#e07a5f;}
+  .readiness-green{background:var(--ok-bg); color:var(--ok-text);}
+  .readiness-yellow{background:var(--low-bg); color:var(--low-text);}
+  .readiness-red{background:var(--exp-bg); color:var(--exp-text);}
+  .overdue-text{color:var(--exp-text);}
   .bulk-add-box{
     margin-top:10px;
     display:flex;
@@ -284,13 +372,18 @@
   }
   .bulk-add-box textarea{
     flex:1;
-    background:var(--panel2);
-    border:1px solid var(--line);
+    background:#ffffff;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
     color:var(--ink);
-    font-family:inherit;
+    font-family:'JetBrains Mono', monospace;
     font-size:12px;
     padding:8px;
     min-height:60px;
+  }
+  .bulk-add-box textarea:focus{
+    outline:none;
+    border-color:var(--ink);
   }
   .item-toolbar{
     display:flex;
@@ -299,8 +392,9 @@
     flex-wrap:wrap;
   }
   .item-toolbar input, .item-toolbar select{
-    background:var(--panel2);
-    border:1px solid var(--line);
+    background:#ffffff;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
     color:var(--ink);
     font-family:inherit;
     font-size:12px;
@@ -311,17 +405,18 @@
     gap:10px;
     align-items:center;
   }
-  .undo-toast button{padding:3px 8px; font-size:11px;}
+  .undo-toast button{padding:3px 8px; font-size:11px; background:transparent; color:#fff; border-color:#64748b;}
+  .undo-toast button:hover{background:rgba(255,255,255,0.12); border-color:#cbd5e1;}
   .kit-id{
+    font-family:'JetBrains Mono', monospace;
     font-size:10px;
     color:var(--dim);
-    letter-spacing:0.14em;
+    letter-spacing:0.06em;
   }
   .kit-name{
-    font-family:'Arial Narrow', Arial, sans-serif;
-    font-size:19px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:16px;
     font-weight:700;
-    text-transform:uppercase;
     background:transparent;
     border:none;
     color:var(--ink);
@@ -330,12 +425,12 @@
   }
   .kit-name:focus{
     outline:none;
-    border-bottom:1px dashed var(--tag);
+    border-bottom:1px solid var(--ink);
   }
   .kit-actions{display:flex; gap:8px;}
   .kit-body{
     border-top:1px solid var(--line);
-    padding:14px 18px 16px 22px;
+    padding:14px 18px 16px;
     display:grid;
     grid-template-columns:1fr auto;
     gap:14px;
@@ -354,6 +449,7 @@
   }
   .kit-notes:focus{outline:none; color:var(--ink);}
   .kit-status{
+    font-family:'JetBrains Mono', monospace;
     font-size:11px;
     text-align:right;
     color:var(--dim);
@@ -366,46 +462,52 @@
     padding:5px 9px;
   }
   .empty{
-    border:1px dashed var(--line);
-    padding:40px 24px;
+    border:1px solid var(--ink);
+    border-radius:var(--radius);
+    padding:32px 24px;
     text-align:center;
     color:var(--dim);
     font-size:13px;
+    background:var(--panel);
   }
-  .empty b{color:var(--ink); display:block; font-size:15px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;}
+  .empty b{color:var(--ink); display:block; font-size:15px; margin-bottom:6px; font-weight:700; font-family:'Space Grotesk', sans-serif;}
   .new-kit-row{
     display:flex;
     gap:8px;
-    margin-top:18px;
+    margin-top:16px;
   }
   .new-kit-row input{
     flex:1;
-    background:var(--panel2);
-    border:1px solid var(--line);
+    background:#ffffff;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
     color:var(--ink);
     padding:9px 12px;
-    font-family:inherit;
+    font-family:'JetBrains Mono', monospace;
     font-size:13px;
   }
-  .new-kit-row input:focus{outline:none; border-color:var(--tag);}
+  .new-kit-row input:focus{outline:none; border-color:var(--ink);}
   .toast{
     position:fixed;
     bottom:20px;
     left:50%;
     transform:translateX(-50%);
-    background:var(--panel2);
-    border:1px solid var(--tag);
+    background:#0f172a;
+    color:#ffffff;
+    border-radius:var(--radius);
     padding:10px 18px;
+    font-family:'Space Grotesk', sans-serif;
     font-size:12px;
-    letter-spacing:0.04em;
+    font-weight:600;
     opacity:0;
     transition:opacity 0.2s;
     pointer-events:none;
+    max-width:90vw;
   }
   .toast.show{opacity:1;}
   @media (max-width:520px){
-    header{padding:18px 16px;}
-    main{padding:18px;}
+    header{padding:16px;}
+    main{padding:16px;}
     .meta-strip{text-align:left;}
     .kit-body{grid-template-columns:1fr;}
     .kit-status{text-align:left;}
@@ -439,6 +541,7 @@
   <div class="toolbar">
     <button class="primary" onclick="document.getElementById('newKitInput').focus()">+ Add kit</button>
     <button onclick="loadKits()">Refresh</button>
+    <button onclick="showExpiringDashboard()" title="See everything expiring in the next 60 days, across all kits">⏰ Expiring</button>
     <input id="globalSearch" type="text" placeholder="Search items across all kits..." oninput="globalSearch(this.value)" style="flex:1; min-width:200px; background:var(--panel2); border:1px solid var(--line); color:var(--ink); padding:9px 12px; font-family:inherit; font-size:12px;" />
   </div>
   <div id="globalResults"></div>
@@ -563,6 +666,7 @@ let allKitsCache = [];
 let openPanels = {};
 let itemFilters = {}; // per kit: {sort, category, status}
 let lastDeleted = null;
+let itemsCache = {}; // per kit: last loaded items array, used by CSV export
 
 function toggleItems(kitId){
   const panel = document.getElementById('items-'+kitId);
@@ -578,6 +682,7 @@ async function loadItems(kitId){
   panel.innerHTML = 'Loading...';
   const res = await fetch(`/.netlify/functions/items?kit_id=${kitId}`);
   let items = await res.json();
+  itemsCache[kitId] = items;
   renderItemsPanel(kitId, items);
 }
 
@@ -622,11 +727,17 @@ function renderItemsPanel(kitId, items){
         <option value="category" ${f.sort==='category'?'selected':''}>Sort by category</option>
       </select>
       <button class="primary" onclick="recategorizeKit('${kitId}')" title="Auto-fill missing categories, sort durable vs. consumable, and flag hard-to-count bulk items (gloves, masks, gauze) so they stop reading LOW">✨ AI Audit &amp; Sort</button>
+      <button onclick="exportCSV('${kitId}')" title="Download this kit's items as a spreadsheet">⬇ Export CSV</button>
+      <input type="file" id="csvInput-${kitId}" accept=".csv" style="display:none" onchange="importCSV('${kitId}', this)" />
+      <button onclick="document.getElementById('csvInput-${kitId}').click()" title="Bulk-load items from a CSV file">⬆ Import CSV</button>
     </div>
     ${filtered.length ? renderGroupedItems(kitId, filtered) : '<div style="color:var(--dim); font-size:12px; padding:8px 0;">No items match.</div>'}
     <div class="bulk-add-box">
       <textarea id="bulk-${kitId}" placeholder="Paste items, one per line — e.g.&#10;Gauze Pads 4x4 x10&#10;Tourniquet&#10;Nitrile Gloves&#10;Trauma Shears, 2"></textarea>
-      <button class="primary" onclick="bulkAdd('${kitId}')">Add all</button>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <button class="primary" onclick="bulkAdd('${kitId}')">Add all</button>
+        <button type="button" onclick="voiceBulkAdd('${kitId}')" title="Speak items to add instead of typing — handy mid-restock">🎤 Speak</button>
+      </div>
     </div>`;
 }
 
@@ -673,41 +784,96 @@ function renderItemRow(kitId, i){
 
   return `
     <div class="item-row" data-item-id="${i.id}">
-      <div class="item-photo-wrap">
-        ${i.photo_url
-          ? `<img class="item-photo" src="${i.photo_url}" alt="" />`
-          : `<div class="item-photo-placeholder">+</div>`}
-        <input type="file" accept="image/*" onchange="uploadItemPhoto('${kitId}','${i.id}', this)" />
+      <div class="item-row-main">
+        <div class="item-photo-wrap">
+          ${i.photo_url
+            ? `<img class="item-photo" src="${i.photo_url}" alt="" />`
+            : `<div class="item-photo-placeholder">+</div>`}
+          <input type="file" accept="image/*" onchange="uploadItemPhoto('${kitId}','${i.id}', this)" />
+        </div>
+        <input class="item-name-input" value="${escapeAttr(i.name)}" title="${escapeAttr(i.name)}" onchange="updateItem('${kitId}','${i.id}','name',this.value)" />
+        <span class="status-pill ${pillClass}" title="${softened ? 'Marked as estimated — physically check remaining supply' : ''}">${pillText}</span>
+        ${i.status === 'low' ? `<button class="restock-btn" onclick="restockItem('${kitId}','${i.id}',${i.low_stock_threshold||1})" title="Set a new quantity after restocking">↻ Restock</button>` : ''}
+        <div class="item-row-actions">
+          <button onclick="duplicateItemPrompt('${i.id}')" title="Duplicate to another kit">⧉</button>
+          <button onclick="deleteItem('${kitId}','${i.id}')" title="Delete">✕</button>
+        </div>
       </div>
-      <input value="${escapeAttr(i.name)}" onchange="updateItem('${kitId}','${i.id}','name',this.value)" />
-      <input type="number" value="${i.quantity}" onchange="updateItem('${kitId}','${i.id}','quantity',parseInt(this.value)||0)" />
-      <input value="${escapeAttr(i.category||'')}" placeholder="category" list="category-suggestions" onchange="updateItem('${kitId}','${i.id}','category',this.value)" />
-      <input value="${escapeAttr(i.pack_size||'')}" placeholder="e.g. 100ml" onchange="updateItem('${kitId}','${i.id}','pack_size',this.value)" />
-      <input value="${escapeAttr(i.lot_number||'')}" placeholder="lot #" onchange="updateItem('${kitId}','${i.id}','lot_number',this.value)" />
-      <select onchange="updateItem('${kitId}','${i.id}','condition',this.value)">
-        <option value="sealed" ${i.condition==='sealed'?'selected':''}>Sealed</option>
-        <option value="opened" ${i.condition==='opened'?'selected':''}>Opened</option>
-        <option value="needs_replacement" ${i.condition==='needs_replacement'?'selected':''}>Needs replacement</option>
-      </select>
-      <input type="checkbox" class="est-toggle" ${i.estimate_only?'checked':''} title="Quantity is a rough estimate (e.g. '1 pack') — don't flag as LOW based on this number" onchange="updateItem('${kitId}','${i.id}','estimate_only',this.checked)" />
-      <span class="status-pill ${pillClass}" title="${softened ? 'Marked as estimated — physically check remaining supply' : ''}">${pillText}</span>
-      <div style="display:flex; gap:4px;">
-        <button onclick="duplicateItemPrompt('${i.id}')" title="Duplicate to another kit">⧉</button>
-        <button onclick="deleteItem('${kitId}','${i.id}')" title="Delete">✕</button>
+      <div class="item-row-meta">
+        <label>Qty
+          <div class="qty-stepper">
+            <button type="button" onclick="adjustQty('${kitId}','${i.id}',${i.quantity},-1)">−</button>
+            <input type="number" value="${i.quantity}" onchange="updateItem('${kitId}','${i.id}','quantity',parseInt(this.value)||0)" />
+            <button type="button" onclick="adjustQty('${kitId}','${i.id}',${i.quantity},1)">+</button>
+          </div>
+        </label>
+        <label>Category<input value="${escapeAttr(i.category||'')}" placeholder="category" list="category-suggestions" onchange="updateItem('${kitId}','${i.id}','category',this.value)" /></label>
+        <label>Pack size<input value="${escapeAttr(i.pack_size||'')}" placeholder="e.g. 100ml" onchange="updateItem('${kitId}','${i.id}','pack_size',this.value)" /></label>
+        <label>Lot #<input value="${escapeAttr(i.lot_number||'')}" placeholder="lot #" onchange="updateItem('${kitId}','${i.id}','lot_number',this.value)" /></label>
+        <label>Condition
+          <select onchange="updateItem('${kitId}','${i.id}','condition',this.value)">
+            <option value="sealed" ${i.condition==='sealed'?'selected':''}>Sealed</option>
+            <option value="opened" ${i.condition==='opened'?'selected':''}>Opened</option>
+            <option value="needs_replacement" ${i.condition==='needs_replacement'?'selected':''}>Needs replacement</option>
+          </select>
+        </label>
+        <label class="est-field" title="Quantity is a rough estimate (e.g. '1 pack') — don't flag as LOW based on this number">
+          <input type="checkbox" class="est-toggle" ${i.estimate_only?'checked':''} onchange="updateItem('${kitId}','${i.id}','estimate_only',this.checked)" /> Estimate
+        </label>
       </div>
     </div>`;
+}
+
+// Re-encodes any picked photo (BMP, HEIC, giant camera JPEGs, whatever) into
+// a standard, size-capped JPEG before it ever reaches Supabase Storage.
+// This is what actually fixes uploads: some source formats (BMP especially)
+// get rejected outright, and even accepted formats can be huge uncompressed
+// camera files that hit storage size limits.
+function loadImageFromFile(file){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+    img.src = url;
+  });
+}
+async function normalizePhotoForUpload(file, maxDim = 1600, quality = 0.82){
+  const img = await loadImageFromFile(file);
+  let { width, height } = img;
+  if(width > maxDim || height > maxDim){
+    const scale = maxDim / Math.max(width, height);
+    width = Math.round(width * scale);
+    height = Math.round(height * scale);
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Could not convert image')), 'image/jpeg', quality);
+  });
 }
 
 async function uploadItemPhoto(kitId, itemId, input){
   const file = input.files[0];
   if(!file) return;
-  showToast('Uploading photo...');
-  const ext = file.name.split('.').pop();
+  showToast('Processing photo...');
+  let uploadBlob, ext = 'jpg';
+  try {
+    uploadBlob = await normalizePhotoForUpload(file);
+  } catch(convertErr){
+    console.warn('Could not re-encode image, uploading original as-is:', convertErr);
+    uploadBlob = file;
+    ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  }
   const path = `item-${itemId}-${Date.now()}.${ext}`;
 
-  const { error: uploadErr } = await sb.storage.from('kit-photos').upload(path, file, { upsert: true });
+  showToast('Uploading photo...');
+  const { error: uploadErr } = await sb.storage.from('kit-photos').upload(path, uploadBlob, { upsert: true, contentType: uploadBlob.type || 'image/jpeg' });
   if(uploadErr){
-    showToast('Upload failed');
+    console.error('Item photo upload failed:', uploadErr);
+    showToast('Upload failed: ' + (uploadErr.message || 'see console'));
     return;
   }
   const { data } = sb.storage.from('kit-photos').getPublicUrl(path);
@@ -725,9 +891,14 @@ async function bulkAdd(kitId){
   const ta = document.getElementById('bulk-'+kitId);
   const lines = ta.value.split('\n').map(l=>l.trim()).filter(Boolean);
   if(!lines.length) return;
-  await fetch('/.netlify/functions/items', {method:'POST', body: JSON.stringify({action:'bulk_add', kit_id: kitId, lines})});
+  showToast('Adding & categorizing...');
+  const res = await fetch('/.netlify/functions/items', {method:'POST', body: JSON.stringify({action:'bulk_add', kit_id: kitId, lines})});
+  const result = await res.json();
   ta.value = '';
-  showToast(lines.length + ' items added');
+  const parts = [];
+  if(result.inserted) parts.push(`${result.inserted} new`);
+  if(result.merged) parts.push(`${result.merged} merged into existing`);
+  showToast(parts.length ? parts.join(', ') : 'Added');
   loadItems(kitId);
 }
 
@@ -737,7 +908,9 @@ async function recategorizeKit(kitId){
   const result = await res.json();
   const parts = [];
   if(result.updated) parts.push(`${result.updated} categorized/sorted`);
+  if(result.aiClassified) parts.push(`${result.aiClassified} via AI`);
   if(result.flaggedEstimates) parts.push(`${result.flaggedEstimates} flagged as estimates`);
+  if(result.stillUncategorized) parts.push(`${result.stillUncategorized} still unrecognized`);
   showToast(parts.length ? parts.join(', ') : 'Nothing to audit — all clean');
   loadItems(kitId);
 }
@@ -789,10 +962,152 @@ async function deleteItem(kitId, itemId){
 
 function showUndoToast(msg, onUndo){
   const t = document.getElementById('toast');
-  t.innerHTML = `<span class="undo-toast">${msg} <button onclick="(${onUndo.toString()})()">Undo</button></span>`;
+  t.innerHTML = '';
+  const span = document.createElement('span');
+  span.className = 'undo-toast';
+  span.appendChild(document.createTextNode(msg + ' '));
+  const btn = document.createElement('button');
+  btn.textContent = 'Undo';
+  btn.onclick = onUndo; // real closure — no more broken .toString() re-execution
+  span.appendChild(btn);
+  t.appendChild(span);
   t.classList.add('show');
   clearTimeout(window._toastTimer);
   window._toastTimer = setTimeout(()=>t.classList.remove('show'), 4000);
+}
+
+function adjustQty(kitId, itemId, current, delta){
+  const next = Math.max(0, current + delta);
+  updateItem(kitId, itemId, 'quantity', next);
+}
+
+function restockItem(kitId, itemId, threshold){
+  const suggested = Math.max(threshold * 3, threshold + 5, 10);
+  const val = prompt('Quantity after restocking:', suggested);
+  if(val === null) return;
+  const qty = parseInt(val, 10);
+  if(isNaN(qty) || qty < 0) return;
+  updateItem(kitId, itemId, 'quantity', qty);
+}
+
+// --- CSV export / import ---
+function csvEscape(v){
+  if(v === null || v === undefined) return '';
+  const s = String(v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+const CSV_HEADERS = ['name','quantity','category','item_type','low_stock_threshold','expires_at','pack_size','lot_number','condition','estimate_only'];
+
+function exportCSV(kitId){
+  const items = itemsCache[kitId] || [];
+  if(!items.length){ showToast('Nothing to export yet'); return; }
+  const kit = allKitsCache.find(k => k.id === kitId);
+  const rows = items.map(i => CSV_HEADERS.map(h => csvEscape(i[h])).join(','));
+  const csv = [CSV_HEADERS.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${(kit?.name || 'kit').replace(/[^a-z0-9]/gi,'_')}_items.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function splitCSVLine(line){
+  const result = []; let cur = ''; let inQuotes = false;
+  for(let i=0; i<line.length; i++){
+    const c = line[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(line[i+1] === '"'){ cur += '"'; i++; } else inQuotes = false;
+      } else cur += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ result.push(cur); cur = ''; }
+      else cur += c;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+function parseCSV(text){
+  const lines = text.split(/\r?\n/).filter(l => l.trim().length);
+  if(!lines.length) return [];
+  const headers = splitCSVLine(lines[0]).map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const cells = splitCSVLine(line);
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = (cells[idx] || '').trim(); });
+    return obj;
+  });
+}
+
+async function importCSV(kitId, input){
+  const file = input.files[0];
+  if(!file) return;
+  const text = await file.text();
+  const rows = parseCSV(text).filter(r => r.name);
+  input.value = '';
+  if(!rows.length){ showToast('No valid rows found in that CSV'); return; }
+  showToast('Importing & categorizing...');
+  const res = await fetch('/.netlify/functions/items', {method:'POST', body: JSON.stringify({action:'csv_import', kit_id: kitId, rows})});
+  const result = await res.json();
+  const parts = [];
+  if(result.inserted) parts.push(`${result.inserted} new`);
+  if(result.merged) parts.push(`${result.merged} merged into existing`);
+  showToast(parts.length ? parts.join(', ') : (result.error || 'Import failed'));
+  loadItems(kitId);
+}
+
+// --- Voice-to-bulk-add ---
+function voiceBulkAdd(kitId){
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRec){ showToast('Voice input not supported in this browser'); return; }
+  const rec = new SpeechRec();
+  rec.lang = 'en-US';
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  showToast('Listening...');
+  rec.onresult = (e) => {
+    const heard = e.results[0][0].transcript;
+    // Split "gauze pads, tourniquet and gloves" into separate list lines.
+    const parts = heard.split(/,| and /i).map(s => s.trim()).filter(Boolean);
+    const ta = document.getElementById('bulk-'+kitId);
+    ta.value = ta.value ? ta.value + '\n' + parts.join('\n') : parts.join('\n');
+    showToast('Heard: ' + heard);
+  };
+  rec.onerror = (e) => showToast('Voice error: ' + e.error);
+  rec.start();
+}
+
+// --- Expiry dashboard across all kits ---
+async function showExpiringDashboard(){
+  const results = document.getElementById('globalResults');
+  results.innerHTML = 'Loading...';
+  const res = await fetch('/.netlify/functions/items');
+  const items = await res.json();
+  const now = Date.now();
+  const upcoming = items
+    .filter(i => i.expires_at)
+    .map(i => ({...i, daysLeft: Math.floor((new Date(i.expires_at) - now) / 86400000)}))
+    .filter(i => i.daysLeft <= 60)
+    .sort((a,b) => a.daysLeft - b.daysLeft);
+
+  if(!upcoming.length){
+    results.innerHTML = '<div class="empty" style="margin-bottom:16px;">Nothing expired or expiring in the next 60 days.</div>';
+    return;
+  }
+  results.innerHTML = `<div class="kit" style="margin-bottom:16px;"><div class="kit-body" style="grid-template-columns:1fr; padding-top:14px;">
+    <div style="font-size:11px; color:var(--dim); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.06em;">Expiring within 60 days — across all kits</div>
+    ${upcoming.map(i => `<div class="search-row">
+      <span>${escapeHtml(i.name)}</span>
+      <span style="color:var(--dim); font-size:11px;">${escapeHtml(i.kits?.name || '')}</span>
+      <span style="color:${i.daysLeft < 0 ? '#b91c1c' : i.daysLeft <= 14 ? '#92400e' : 'var(--dim)'}; font-family:'JetBrains Mono', monospace; font-weight:600;">${i.daysLeft < 0 ? `Expired ${Math.abs(i.daysLeft)}d ago` : `${i.daysLeft}d left`}</span>
+      <span class="status-pill status-${i.status}">${i.status}</span>
+    </div>`).join('')}
+  </div></div>`;
 }
 
 let globalSearchTimer;
@@ -805,7 +1120,7 @@ function globalSearch(q){
     const items = await res.json();
     if(!items.length){ results.innerHTML = '<div class="empty" style="margin-bottom:16px;">No items match.</div>'; return; }
     results.innerHTML = `<div class="kit" style="margin-bottom:16px;"><div class="kit-body" style="grid-template-columns:1fr; padding-top:14px;">
-      ${items.map(i => `<div class="item-row" style="grid-template-columns:1fr 60px 120px 90px;">
+      ${items.map(i => `<div class="search-row">
         <span>${escapeHtml(i.name)}</span>
         <span>${i.quantity}</span>
         <span style="color:var(--dim); font-size:11px;">${escapeHtml(i.kits?.name || '')}</span>
@@ -858,13 +1173,22 @@ async function deleteKit(id){
 async function uploadPhoto(kitId, input){
   const file = input.files[0];
   if(!file) return;
-  showToast('Uploading photo...');
-  const ext = file.name.split('.').pop();
+  showToast('Processing photo...');
+  let uploadBlob, ext = 'jpg';
+  try {
+    uploadBlob = await normalizePhotoForUpload(file);
+  } catch(convertErr){
+    console.warn('Could not re-encode image, uploading original as-is:', convertErr);
+    uploadBlob = file;
+    ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  }
   const path = `${kitId}-${Date.now()}.${ext}`;
 
-  const { error: uploadErr } = await sb.storage.from('kit-photos').upload(path, file, { upsert: true });
+  showToast('Uploading photo...');
+  const { error: uploadErr } = await sb.storage.from('kit-photos').upload(path, uploadBlob, { upsert: true, contentType: uploadBlob.type || 'image/jpeg' });
   if(uploadErr){
-    showToast('Upload failed — check storage bucket exists');
+    console.error('Kit photo upload failed:', uploadErr);
+    showToast('Upload failed: ' + (uploadErr.message || 'see console'));
     return;
   }
   const { data } = sb.storage.from('kit-photos').getPublicUrl(path);
@@ -889,6 +1213,12 @@ function escapeAttr(s){
 }
 
 loadKits();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => console.error('SW registration failed:', err));
+  });
+}
 </script>
 </body>
 </html>
