@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventory</title>
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#F4F4F0">
+<meta name="theme-color" content="#0F0A1A">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,20 +14,21 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#0f172a;
-    --dim:#475569;
-    --panel:#ffffff;
-    --panel2:#f4f4f0;
-    --line:#cbd5e1;
-    --line-strong:#94a3b8;
-    --tag:#0f172a;
-    --tag-contrast:#ffffff;
-    --bg:#f4f4f0;
+    --ink:#EDE9F7;
+    --dim:#9A8FB8;
+    --panel:#1A1428;
+    --panel2:#241C38;
+    --input-bg:#1F1730;
+    --line:#3A2E52;
+    --line-strong:#584A78;
+    --tag:#A78BFA;
+    --tag-contrast:#140E22;
+    --bg:#0F0A1A;
     --radius:3px;
-    --ok-bg:#dcfce7;   --ok-text:#14532d;
-    --low-bg:#fffbeb;  --low-text:#92400e;
-    --exp-bg:#fee2e2;  --exp-text:#b91c1c;
-    --est-bg:#eeeee8;  --est-text:#57534e;
+    --ok-bg:rgba(52,211,153,0.14);   --ok-text:#4ADE80;
+    --low-bg:rgba(251,191,36,0.14);  --low-text:#FBBF24;
+    --exp-bg:rgba(248,113,113,0.16); --exp-text:#F87171;
+    --est-bg:rgba(154,143,184,0.14); --est-text:#B7ADCF;
   }
   *{box-sizing:border-box;}
   body{
@@ -86,22 +87,22 @@
     font-family:'Space Grotesk', sans-serif;
     font-size:12px;
     font-weight:600;
-    background:#ffffff;
+    background:var(--panel2);
     color:var(--ink);
-    border:1px solid var(--ink);
+    border:1px solid var(--line-strong);
     border-radius:var(--radius);
     padding:7px 12px;
     cursor:pointer;
-    transition:background 0.1s;
+    transition:background 0.1s, border-color 0.1s;
   }
   button.primary{
-    background:var(--ink);
+    background:var(--tag);
     color:var(--tag-contrast);
-    border-color:var(--ink);
+    border-color:var(--tag);
     font-weight:700;
   }
-  button:hover{background:var(--panel2);}
-  button.primary:hover{background:#1e293b;}
+  button:hover{background:var(--input-bg); border-color:var(--tag);}
+  button.primary:hover{background:#BFA6FC; border-color:#BFA6FC;}
 
   .kit{
     background:var(--panel);
@@ -321,7 +322,7 @@
     cursor:pointer;
   }
   .item-row input, .item-row select{
-    background:#ffffff;
+    background:var(--input-bg);
     border:1px solid var(--line-strong);
     border-radius:var(--radius);
     color:var(--ink);
@@ -333,7 +334,7 @@
   .item-row input:focus, .item-row select:focus,
   .item-toolbar input:focus, .item-toolbar select:focus{
     outline:none;
-    border-color:var(--ink);
+    border-color:var(--tag);
   }
   .status-pill{
     font-family:'Space Grotesk', sans-serif;
@@ -372,7 +373,7 @@
   }
   .bulk-add-box textarea{
     flex:1;
-    background:#ffffff;
+    background:var(--input-bg);
     border:1px solid var(--line-strong);
     border-radius:var(--radius);
     color:var(--ink);
@@ -383,7 +384,7 @@
   }
   .bulk-add-box textarea:focus{
     outline:none;
-    border-color:var(--ink);
+    border-color:var(--tag);
   }
   .item-toolbar{
     display:flex;
@@ -392,7 +393,7 @@
     flex-wrap:wrap;
   }
   .item-toolbar input, .item-toolbar select{
-    background:#ffffff;
+    background:var(--input-bg);
     border:1px solid var(--line-strong);
     border-radius:var(--radius);
     color:var(--ink);
@@ -405,8 +406,8 @@
     gap:10px;
     align-items:center;
   }
-  .undo-toast button{padding:3px 8px; font-size:11px; background:transparent; color:#fff; border-color:#64748b;}
-  .undo-toast button:hover{background:rgba(255,255,255,0.12); border-color:#cbd5e1;}
+  .undo-toast button{padding:3px 8px; font-size:11px; background:transparent; color:var(--ink); border-color:var(--line-strong);}
+  .undo-toast button:hover{background:rgba(255,255,255,0.06); border-color:var(--tag);}
   .kit-id{
     font-family:'JetBrains Mono', monospace;
     font-size:10px;
@@ -425,7 +426,7 @@
   }
   .kit-name:focus{
     outline:none;
-    border-bottom:1px solid var(--ink);
+    border-bottom:1px solid var(--tag);
   }
   .kit-actions{display:flex; gap:8px;}
   .kit-body{
@@ -478,7 +479,7 @@
   }
   .new-kit-row input{
     flex:1;
-    background:#ffffff;
+    background:var(--input-bg);
     border:1px solid var(--line-strong);
     border-radius:var(--radius);
     color:var(--ink);
@@ -486,14 +487,15 @@
     font-family:'JetBrains Mono', monospace;
     font-size:13px;
   }
-  .new-kit-row input:focus{outline:none; border-color:var(--ink);}
+  .new-kit-row input:focus{outline:none; border-color:var(--tag);}
   .toast{
     position:fixed;
     bottom:20px;
     left:50%;
     transform:translateX(-50%);
-    background:#0f172a;
-    color:#ffffff;
+    background:var(--panel2);
+    border:1px solid var(--line-strong);
+    color:var(--ink);
     border-radius:var(--radius);
     padding:10px 18px;
     font-family:'Space Grotesk', sans-serif;
@@ -512,6 +514,130 @@
     .kit-body{grid-template-columns:1fr;}
     .kit-status{text-align:left;}
   }
+
+  /* --- App shell / sidebar --- */
+  .app-shell{display:flex; min-height:100vh;}
+  .sidebar{
+    width:216px;
+    flex-shrink:0;
+    background:var(--panel);
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    padding:20px 14px;
+    gap:4px;
+  }
+  .sidebar-brand{
+    padding:0 8px 18px;
+    margin-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .sidebar-brand .brand-eyebrow{margin-bottom:2px;}
+  .sidebar-brand h1{font-size:18px;}
+  .nav-item{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    width:100%;
+    text-align:left;
+    background:transparent;
+    border:1px solid transparent;
+    color:var(--dim);
+    font-family:'Space Grotesk', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    padding:9px 10px;
+    border-radius:var(--radius);
+    cursor:pointer;
+  }
+  .nav-item:hover{background:var(--panel2); color:var(--ink); border-color:transparent;}
+  .nav-item.active{background:rgba(167,139,250,0.12); color:var(--tag); border-color:rgba(167,139,250,0.35);}
+  .sidebar-footer{
+    margin-top:auto;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    color:var(--dim);
+    line-height:1.6;
+  }
+  .app-main{flex:1; min-width:0; display:flex; flex-direction:column;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* --- Dashboard view --- */
+  .stat-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+    gap:12px;
+    margin-bottom:20px;
+  }
+  .stat-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 16px 14px;
+    border-left:3px solid var(--tag);
+  }
+  .stat-card .stat-label{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--dim);
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .stat-card .stat-value{
+    font-family:'JetBrains Mono', monospace;
+    font-size:26px;
+    font-weight:700;
+    color:var(--ink);
+    line-height:1;
+  }
+  .stat-card .stat-sub{
+    margin-top:6px;
+    font-size:11px;
+    color:var(--dim);
+  }
+  .stat-card.alert{border-left-color:var(--exp-text);}
+  .stat-card.warn{border-left-color:var(--low-text);}
+  .dash-section-title{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--dim);
+    font-weight:700;
+    margin:22px 0 10px;
+  }
+  .attention-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:11px 14px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:8px;
+  }
+  .attention-row .name{font-family:'JetBrains Mono', monospace; font-weight:600; font-size:13px;}
+  .attention-row .why{font-size:11px; color:var(--dim); margin-top:2px;}
+
+  @media (max-width:760px){
+    .app-shell{flex-direction:column;}
+    .sidebar{
+      width:100%;
+      flex-direction:row;
+      align-items:center;
+      padding:12px 14px;
+      overflow-x:auto;
+      border-right:none;
+      border-bottom:1px solid var(--line);
+    }
+    .sidebar-brand{border-bottom:none; border-right:1px solid var(--line); padding:0 14px 0 0; margin:0 10px 0 0; flex-shrink:0;}
+    .sidebar-footer{display:none;}
+    .nav-item{white-space:nowrap; flex-shrink:0;}
+  }
 </style>
 </head>
 <body>
@@ -529,30 +655,52 @@
   <option value="Tools & Equipment"></option>
 </datalist>
 
-<header>
-  <div>
-    <div class="brand-eyebrow">Chamber Youth Taytung</div>
-    <h1>Inventory</h1>
-  </div>
-  <div class="meta-strip" id="metaStrip">— kits on record</div>
-</header>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-eyebrow">Chamber Youth Taytung</div>
+      <h1>Inventory</h1>
+    </div>
+    <nav>
+      <button class="nav-item active" id="nav-dashboard" onclick="switchView('dashboard')">📊&nbsp; Dashboard</button>
+      <button class="nav-item" id="nav-kits" onclick="switchView('kits')">🎒&nbsp; Kits</button>
+    </nav>
+    <div class="sidebar-footer" id="sidebarFooter">— kits on record</div>
+  </aside>
 
-<main>
-  <div class="toolbar">
-    <button class="primary" onclick="document.getElementById('newKitInput').focus()">+ Add kit</button>
-    <button onclick="loadKits()">Refresh</button>
-    <button onclick="showExpiringDashboard()" title="See everything expiring in the next 60 days, across all kits">⏰ Expiring</button>
-    <input id="globalSearch" type="text" placeholder="Search items across all kits..." oninput="globalSearch(this.value)" style="flex:1; min-width:200px; background:var(--panel2); border:1px solid var(--line); color:var(--ink); padding:9px 12px; font-family:inherit; font-size:12px;" />
-  </div>
-  <div id="globalResults"></div>
+  <div class="app-main">
+    <header>
+      <div class="meta-strip" id="metaStrip" style="margin-left:auto;">— kits on record</div>
+    </header>
 
-  <div id="kitList"></div>
+    <main>
+      <section id="view-dashboard" class="view active">
+        <div class="stat-grid" id="statGrid"></div>
+        <div class="dash-section-title">Needs attention</div>
+        <div id="attentionList"><div class="empty">Loading…</div></div>
+        <div class="dash-section-title">Expiring soon (60 days)</div>
+        <div id="dashExpiring"><div class="empty">Loading…</div></div>
+      </section>
 
-  <div class="new-kit-row">
-    <input id="newKitInput" type="text" placeholder="New kit name — e.g. Engine 2 Trauma Bag" />
-    <button class="primary" onclick="createKit()">Create</button>
+      <section id="view-kits" class="view">
+        <div class="toolbar">
+          <button class="primary" onclick="switchView('kits'); document.getElementById('newKitInput').focus()">+ Add kit</button>
+          <button onclick="loadKits()">Refresh</button>
+          <button onclick="showExpiringDashboard()" title="See everything expiring in the next 60 days, across all kits">⏰ Expiring</button>
+          <input id="globalSearch" type="text" placeholder="Search items across all kits..." oninput="globalSearch(this.value)" style="flex:1; min-width:200px; background:var(--input-bg); border:1px solid var(--line); color:var(--ink); padding:9px 12px; font-family:inherit; font-size:12px;" />
+        </div>
+        <div id="globalResults"></div>
+
+        <div id="kitList"></div>
+
+        <div class="new-kit-row">
+          <input id="newKitInput" type="text" placeholder="New kit name — e.g. Engine 2 Trauma Bag" />
+          <button class="primary" onclick="createKit()">Create</button>
+        </div>
+      </section>
+    </main>
   </div>
-</main>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -568,17 +716,135 @@ async function loadKits(){
   try{
     const res = await fetch(API);
     const kits = await res.json();
-    document.getElementById('metaStrip').textContent =
-      kits.length + (kits.length === 1 ? ' kit on record' : ' kits on record');
+    const metaText = kits.length + (kits.length === 1 ? ' kit on record' : ' kits on record');
+    document.getElementById('metaStrip').textContent = metaText;
+    document.getElementById('sidebarFooter').textContent = metaText;
 
     if(!kits.length){
       list.innerHTML = '<div class="empty"><b>No kits logged yet</b>Add the first kit below to start the manifest.</div>';
+      allKitsCache = [];
+      renderDashboard([]);
       return;
     }
     allKitsCache = kits;
     list.innerHTML = kits.map(renderKit).join('');
+    renderDashboard(kits);
   }catch(e){
     list.innerHTML = '<div class="empty"><b>Manifest unreachable</b>Check that SUPABASE_URL and SUPABASE_ANON_KEY are set in Netlify, then refresh.</div>';
+  }
+}
+
+// --- View switching (sidebar) ---
+function switchView(view){
+  ['dashboard','kits'].forEach(v => {
+    document.getElementById('view-'+v).classList.toggle('active', v===view);
+    document.getElementById('nav-'+v).classList.toggle('active', v===view);
+  });
+}
+
+// --- Dashboard: stat cards + needs-attention + expiring-soon, all built
+// from data already on hand (allKitsCache) or one extra lightweight fetch
+// for expiring items — no new backend endpoints required.
+function renderDashboard(kits){
+  const grid = document.getElementById('statGrid');
+  const attention = document.getElementById('attentionList');
+
+  if(!kits.length){
+    grid.innerHTML = '';
+    attention.innerHTML = '<div class="empty"><b>No kits yet</b>Add your first kit from the Kits tab to see stats here.</div>';
+    document.getElementById('dashExpiring').innerHTML = '';
+    return;
+  }
+
+  const totalKits = kits.length;
+  const avgReadiness = Math.round(kits.reduce((s,k) => s + (k.readiness_pct ?? 100), 0) / totalKits);
+  const totalFlagged = kits.reduce((s,k) => s + (k.flagged_items||0), 0);
+  const overdueKits = kits.filter(k => {
+    if(!k.last_checked_at) return true;
+    return (Date.now() - new Date(k.last_checked_at)) / 86400000 > 30;
+  });
+
+  grid.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Kits tracked</div>
+      <div class="stat-value">${totalKits}</div>
+    </div>
+    <div class="stat-card ${avgReadiness < 60 ? 'alert' : avgReadiness < 90 ? 'warn' : ''}">
+      <div class="stat-label">Avg. readiness</div>
+      <div class="stat-value">${avgReadiness}%</div>
+    </div>
+    <div class="stat-card ${totalFlagged > 0 ? 'warn' : ''}">
+      <div class="stat-label">Flagged items</div>
+      <div class="stat-value">${totalFlagged}</div>
+      <div class="stat-sub">low stock, expiring, or expired</div>
+    </div>
+    <div class="stat-card ${overdueKits.length > 0 ? 'alert' : ''}">
+      <div class="stat-label">Overdue inspection</div>
+      <div class="stat-value">${overdueKits.length}</div>
+      <div class="stat-sub">of ${totalKits} kits, 30+ days</div>
+    </div>`;
+
+  const needsAttention = kits
+    .filter(k => (k.readiness_pct ?? 100) < 90 || overdueKits.includes(k))
+    .sort((a,b) => (a.readiness_pct ?? 100) - (b.readiness_pct ?? 100));
+
+  if(!needsAttention.length){
+    attention.innerHTML = '<div class="empty">Every kit is at or above 90% readiness and checked within 30 days. Nice work.</div>';
+  } else {
+    attention.innerHTML = needsAttention.slice(0, 8).map(k => {
+      const reasons = [];
+      if((k.readiness_pct ?? 100) < 90) reasons.push(`${k.readiness_pct}% ready, ${k.flagged_items||0} flagged`);
+      if(overdueKits.includes(k)){
+        reasons.push(k.last_checked_at ? 'inspection overdue' : 'never inspected');
+      }
+      return `<div class="attention-row">
+        <div>
+          <div class="name">${escapeHtml(k.name)}</div>
+          <div class="why">${reasons.join(' · ')}</div>
+        </div>
+        <button onclick="openKitFromDashboard('${k.id}')">Open</button>
+      </div>`;
+    }).join('');
+  }
+
+  loadDashboardExpiring();
+}
+
+function openKitFromDashboard(kitId){
+  switchView('kits');
+  const card = document.querySelector(`[data-id="${kitId}"]`);
+  if(card){
+    card.scrollIntoView({behavior:'smooth', block:'center'});
+    if(!openPanels[kitId]) toggleItems(kitId);
+  }
+}
+
+async function loadDashboardExpiring(){
+  const el = document.getElementById('dashExpiring');
+  try{
+    const res = await fetch('/.netlify/functions/items');
+    const items = await res.json();
+    const now = Date.now();
+    const upcoming = items
+      .filter(i => i.expires_at)
+      .map(i => ({...i, daysLeft: Math.floor((new Date(i.expires_at) - now) / 86400000)}))
+      .filter(i => i.daysLeft <= 60)
+      .sort((a,b) => a.daysLeft - b.daysLeft);
+
+    if(!upcoming.length){
+      el.innerHTML = '<div class="empty">Nothing expired or expiring in the next 60 days.</div>';
+      return;
+    }
+    el.innerHTML = upcoming.slice(0, 6).map(i => `<div class="attention-row">
+        <div>
+          <div class="name">${escapeHtml(i.name)}</div>
+          <div class="why">${escapeHtml(i.kits?.name || '')}</div>
+        </div>
+        <span class="status-pill status-${i.status}" style="align-self:center;">${i.daysLeft < 0 ? `expired ${Math.abs(i.daysLeft)}d ago` : `${i.daysLeft}d left`}</span>
+      </div>`).join('') +
+      (upcoming.length > 6 ? `<button onclick="switchView('kits'); showExpiringDashboard();" style="margin-top:4px;">View all ${upcoming.length} →</button>` : '');
+  }catch(e){
+    el.innerHTML = '<div class="empty">Could not load expiring items.</div>';
   }
 }
 
